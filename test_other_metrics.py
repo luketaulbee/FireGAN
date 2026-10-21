@@ -4,7 +4,6 @@ import os
 import numpy as np
 import h5py
 
-# Optional OpenCV (faster Laplacian)
 try:
     import cv2
 except ImportError:
@@ -12,11 +11,8 @@ except ImportError:
     from scipy.signal import convolve2d
     print("[warning] cv2 not found; using scipy convolution fallback.")
 
-# ------------------------------------------------------------------
-# Setup
-# ------------------------------------------------------------------
 
-workpath = r'C:\Users\lhtau\OneDrive\Desktop\FireGAN_LukeTaulbee'
+workpath = r''
 
 import sys
 sys.path.append(workpath)
@@ -47,10 +43,6 @@ generator.load_state_dict(
 
 generator.eval()
 
-# ------------------------------------------------------------------
-# Metric Utilities
-# ------------------------------------------------------------------
-
 def _validate_inputs(pred, gt):
     if pred.shape != gt.shape:
         raise ValueError("pred and gt must have same shape")
@@ -59,7 +51,7 @@ def _validate_inputs(pred, gt):
     return pred.astype(np.float32), gt.astype(np.float32)
 
 
-# ---------------- Gradient RMSE (vector form) ----------------
+#  Gradient RMSE (vector form) 
 def GradientRMSE(pred, gt):
     pred, gt = _validate_inputs(pred, gt)
     diff = pred - gt
@@ -70,7 +62,7 @@ def GradientRMSE(pred, gt):
     return np.sqrt(np.mean(grad_x**2 + grad_y**2))
 
 
-# ---------------- Laplace RMSE ----------------
+#  Laplace RMSE 
 def LaplaceRMSE(pred, gt):
     pred, gt = _validate_inputs(pred, gt)
 
@@ -103,7 +95,7 @@ def LaplaceRMSE(pred, gt):
     return np.sqrt(np.mean((pred_lap - gt_lap) ** 2))
 
 
-# ---------------- Fourier RMSE ----------------
+#  Fourier RMSE 
 def FourierRMSE(pred, gt, normalize=True):
     pred, gt = _validate_inputs(pred, gt)
 
@@ -121,16 +113,9 @@ def FourierRMSE(pred, gt, normalize=True):
     return np.sqrt(np.mean((pred_mag - gt_mag) ** 2))
 
 
-# ------------------------------------------------------------------
-# Channel-Specific Metric Wrapper
-# ------------------------------------------------------------------
 
 def compute_metrics(pred_img, gt_img):
-    """
-    Compute metrics separately for channels 0,1,2.
-    Returns flat dict:
-      grad_rmse_c0, grad_rmse_c1, grad_rmse_c2, etc.
-    """
+
     metrics = {}
 
     for c in range(pred_img.shape[0]):
@@ -144,9 +129,6 @@ def compute_metrics(pred_img, gt_img):
     return metrics
 
 
-# ------------------------------------------------------------------
-# Data Loop
-# ------------------------------------------------------------------
 
 test_dir = os.path.join(workpath, 'Data', 'Test1')
 filelist = sorted(os.listdir(test_dir))
@@ -187,10 +169,6 @@ for i in range(len_file):
         if k != "filename":
             print(f"  {k:<20s}: {v:.6f}")
 
-
-# ------------------------------------------------------------------
-# Global Aggregation (Per Channel)
-# ------------------------------------------------------------------
 
 metric_keys = [k for k in all_metrics[0].keys() if k != "filename"]
 
