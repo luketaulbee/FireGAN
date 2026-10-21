@@ -1,31 +1,5 @@
 
 
-def plot_example(viirs, goes, sr_viirs, interpolation, batches_done, channel_name, vmin=None, vmax=None, cmap=None):
-
-    # TODO: add an arg for savefigure path
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-
-    im1 = axes[0, 0].imshow(viirs, cmap=cmap, vmin=vmin, vmax=vmax)
-    axes[0, 0].set_title(f'VIIRS {channel_name}')
-    plt.colorbar(im1, ax=axes[0, 0], fraction=0.04, pad=0.025)
-
-    im2 = axes[0, 1].imshow(goes, cmap=cmap, vmin=vmin, vmax=vmax)
-    axes[0, 1].set_title(f'GOES {channel_name}')
-    plt.colorbar(im2, ax=axes[0, 1], fraction=0.04, pad=0.025)
-
-    im3 = axes[1, 0].imshow(sr_viirs, cmap=cmap, vmin=vmin, vmax=vmax)
-    axes[1, 0].set_title(f'SR {channel_name}')
-    plt.colorbar(im3, ax=axes[1, 0], fraction=0.04, pad=0.025)
-
-    im4 = axes[1, 1].imshow(interpolation, cmap=cmap, vmin=vmin, vmax=vmax)
-    axes[1, 1].set_title(f'Interpolation {channel_name}')
-    plt.colorbar(im4, ax=axes[1, 1], fraction=0.04, pad=0.025)
-
-    #Save figure
-    plt.savefig(f"{workpath}training_experimental\\plot\\{batches_done}.{train_filelist[i]}.{channel_name}.png", format='png', bbox_inches='tight', facecolor=(1, 1, 1, 0))
-
-    plt.close()
-
 import sys
 import datetime as dt
 import os
@@ -40,7 +14,7 @@ import torch.nn as nn
 import cartopy.feature as cf
 # import cv2
 
-workpath = 'C:\\Users\\lhtau\\OneDrive\\Desktop\\Research\\FireGAN_HW\\'
+workpath = ''
 
 import sys
 sys.path.append(workpath)
@@ -114,8 +88,8 @@ criterion_content = torch.nn.MSELoss().to(device)
 criterion_pixel = torch.nn.MSELoss().to(device)
 
 if opt.load_model:
-   generator.load_state_dict(torch.load(workpath + "training_experimental/Saved_Models/gen_1e3lr_newMAXmin_24000.pth"))  # gen_1e3lr_newMAXmin_18000
-   discriminator.load_state_dict(torch.load(workpath + "training_experimental/Saved_Models/disc_1e3lr_newMAXmin_24000.pth"))  #disc_1e3lr_newMAXmin_18000
+   generator.load_state_dict(torch.load(workpath + ""))  
+   discriminator.load_state_dict(torch.load(workpath + ""))  
 
 
 optimizer_G = torch.optim.Adam(generator.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
@@ -127,7 +101,7 @@ Tensor = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.Tensor
 # ----------
 #  Training
 # ----------
-train_filelist = os.listdir(workpath + 'Train1/') 
+train_filelist = os.listdir(workpath + '') 
 
 train_filelist.sort()
 len_train = len(train_filelist)
@@ -238,13 +212,9 @@ for epoch in range(0, opt.n_epochs):
         x_mask_tensor[x_mask == 0] = float('nan')
         y_mask_tensor[y_mask == 0] = float('nan')
 
-        # plot_example((imgs_hr[0, 2].cpu()), (imgs_lr[0, 2].cpu()), (gen_hr[0, 2].cpu().detach().numpy()), intero[0, 2].cpu(), epoch, "AFI", cmap='bwr')
-        # plot_example((imgs_hr[0, 1].cpu()), (imgs_lr[0, 1].cpu()), (gen_hr[0, 1].cpu().detach().numpy()), intero[0, 0].cpu(), epoch, "BT07", cmap='Spectral_r')
-        # plot_example((imgs_hr[0, 0].cpu()), (imgs_lr[0, 0].cpu()), (gen_hr[0, 0].cpu().detach().numpy()), intero[0, 1].cpu(), epoch, "BT14", cmap='Spectral_r')
-
         if epoch % opt.checkpoint_interval == 0:
-              torch.save(generator.state_dict(), workpath + "training_experimental/Saved_Models/riviera_g001.pth")
-              torch.save(discriminator.state_dict(), workpath + "training_experimental/Saved_Models/riviera_d001.pth")
+              torch.save(generator.state_dict(), workpath + "")
+              torch.save(discriminator.state_dict(), workpath + "")
 
 
         print(f"[Epoch {epoch}/{opt.n_epochs}] [File {i}/{len_train}] [D loss: {loss_D.item()}] [G loss: {loss_G.item()}]")
