@@ -14,7 +14,7 @@ from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import peak_signal_noise_ratio as psnr
 import pywt
 
-workpath = r'C:\Users\lhtau\OneDrive\Desktop\FireGAN_LukeTaulbee'
+workpath = r''
 
 import sys
 sys.path.append(workpath)
@@ -98,35 +98,6 @@ def calculate_r2(pred, gt):
 
 
 
-# def calculate_psnr(pred, gt):
-#     # Ensure images are in the same shape
-#     if pred.ndim == 2:
-#         pred = pred[np.newaxis, :, :]
-#     if gt.ndim == 2:
-#         gt = gt[np.newaxis, :, :]
-
-#     # Replicate grayscale to RGB if necessary
-#     if pred.shape[0] == 1:
-#         pred = np.repeat(pred, 3, axis=0)
-#     if gt.shape[0] == 1:
-#         gt = np.repeat(gt, 3, axis=0)
-
-#     # Normalize images if necessary (assuming norm_viirs normalizes to range [0, 1])
-#     pred = norm_viirs(np.array(pred))
-#     gt = norm_viirs(np.array(gt))
-
-#     # Calculate Mean Squared Error (MSE)
-#     mse = np.mean((pred - gt) ** 2)
-
-#     # Handle perfect match (MSE = 0)
-#     if mse == 0:
-#         return float('inf')
-
-#     # Calculate Peak Signal-to-Noise Ratio (PSNR)
-#     max_pixel = gt.max()  # Assuming pixel values are in range [0, 1]
-#     psnr_value = 10 * np.log10((max_pixel ** 2) / mse)
-
-#     return psnr_value
 
 def calculate_psnr(pred, gt):
 
@@ -230,222 +201,7 @@ r2_list = []
 psnr_list = []
 ssim_list = []
 
-# for i in range(len_file):
-#     file = h5py.File(workpath + 'Test1/' + filelist[i], 'r')
 
-
-
-#     tmp_lr = np.array(file['goes'][:]) 
-#     tmp_hr = np.array(file['viirs'][:])
-#     # file.close()
-
-#     tmp_lr = norm_goes(tmp_lr)  
-#     tmp_hr = norm_viirs(tmp_hr)  
-
-#     # pad_lr = np.zeros((3, 27, 35))
-#     # pad_hr = np.zeros((3, 162, 210))
-
-#     # pad_lr[:, :27, :35] = tmp_lr
-#     # pad_hr[:, :162, :210] = tmp_hr
-
-#     # tmp_lr = Tensor(pad_lr)
-#     # tmp_hr = Tensor(pad_hr)
-
-#     # tmp_lr = torch.reshape(tmp_lr, (1, 3, 27, 35))
-#     # tmp_hr = torch.reshape(tmp_hr, (1, 3, 162, 210))
-
-#     # imgs_lr = Variable(tmp_lr.type(Tensor)).to(device)
-#     # imgs_hr = Variable(tmp_hr.type(Tensor)).to(device)
-
-#     tmp_lr = Tensor(tmp_lr)
-#     tmp_hr = Tensor(tmp_hr)
-#     tmp_lr = torch.reshape(tmp_lr, (1, 3, 27, 35))
-#     tmp_hr = torch.reshape(tmp_hr, (1, 3, 162, 210))
-#     imgs_lr = Variable(tmp_lr.type(Tensor)).to(device)
-#     imgs_hr = Variable(tmp_hr.type(Tensor)).to(device)
-
-#     gen_hr = generator(imgs_lr)
-
-#     intero = nn.functional.interpolate(imgs_lr, scale_factor=4)
-
-#     gen_hr = denorm_viirs(gen_hr)
-#     tmp_lr = denorm_goes(tmp_lr)
-#     tmp_hr = denorm_viirs(tmp_hr)
-#     intero = denorm_goes(intero)
-
-#     np.save(workpath + 'Test_Outputs/Test_Interpolation_HW/' + filelist[i][:-3] + '.npy', intero[0].cpu().detach().numpy())
-#     np.save(workpath + 'Test_Outputs/Test_Outputs_HW/' + filelist[i][:-3] + '.npy', gen_hr[0].cpu().detach().numpy())
-
-#     # Apply masking if needed
-#     x_mask_tensor = Tensor(x_mask)
-#     y_mask_tensor = Tensor(y_mask)
-
-#     x_mask_tensor[x_mask == 0] = float('nan')
-#     y_mask_tensor[y_mask == 0] = float('nan')
-
-#     imgs_lr = imgs_lr[:, :, :27, :]
-#     intero = intero[:, :, :162, :]
-#     imgs_hr = imgs_hr[:, :, :162, :]
-#     gen_hr = gen_hr[:, :, :162, :]
-
-#     tmp_lr = imgs_lr[:, :, :27, :]
-#     tmp_hr = imgs_hr[:, :, :162, :]
-
-#     fig, axs = plt.subplots(3, 3, figsize=(16, 14), subplot_kw={'projection': ccrs.PlateCarree()})
-
-#     vmin_af, vmax_af = -1, 5
-#     vmin_lwir, vmax_lwir = 270, 320
-#     vmin_swir, vmax_swir = 270, 320
-
-#     pad = 0.07
-#     fraction = 0.035
-
-#     bbox = [-156.75, 20.45, -155.95, 21.05]
-#     extent = [bbox[0], bbox[2], bbox[1], bbox[3]]
-
-#     images = [
-#         (tmp_lr[0, 2].cpu().numpy(), 'bwr', vmin_af, vmax_af, "(a) GOES AFI", 0, 0),
-#         (tmp_hr[0, 2].cpu().numpy(), 'bwr', vmin_af, vmax_af, "(d) VIIRS AFI", 1, 0),
-#         (gen_hr[0, 2].cpu().detach().numpy(), 'bwr', vmin_af, vmax_af, "(g) Downscaled AFI", 2, 0),
-#         (tmp_lr[0, 1].cpu().numpy(), 'Spectral_r', vmin_lwir, vmax_lwir, "(b) GOES C07 BT", 0, 1),
-#         (tmp_hr[0, 1].cpu().numpy(), 'Spectral_r', vmin_lwir, vmax_lwir, "(e) VIIRS I04 BT", 1, 1),
-#         (gen_hr[0, 1].cpu().detach().numpy(), 'Spectral_r', vmin_lwir, vmax_lwir, "(h) Downscaled C07 BT", 2, 1),
-#         (tmp_lr[0, 0].cpu().numpy(), 'Spectral_r', vmin_swir, vmax_swir, "(c) GOES C14 BT", 0, 2),
-#         (tmp_hr[0, 0].cpu().numpy(), 'Spectral_r', vmin_swir, vmax_swir, "(f) VIIRS I05 BT", 1, 2),
-#         (gen_hr[0, 0].cpu().detach().numpy(), 'Spectral_r', vmin_swir, vmax_swir, "(i) Downscaled C14 BT", 2, 2)
-#     ]
-
-
-#     for data, cmap, vmin, vmax, title, row, col in images:
-#         ax = axs[row, col]
-#         ax.set_extent(extent, crs=ccrs.PlateCarree())
-#         ax.add_feature(cfeature.OCEAN, zorder=2)
-#         ax.add_feature(cfeature.COASTLINE, linewidth=2.5)
-#         ax.add_feature(cfeature.BORDERS, linestyle=':')
-
-#         gl = ax.gridlines(
-#             crs=ccrs.PlateCarree(),
-#             draw_labels=False,
-#             linewidth=1,
-#             color='black',
-#             linestyle='--'
-#         )
-        
-#         x_ticks = np.linspace(bbox[0], bbox[2], 5)  
-#         y_ticks = np.linspace(bbox[1], bbox[3], 4) 
-        
-#         gl.xlocator = mticker.FixedLocator(x_ticks)
-#         gl.ylocator = mticker.FixedLocator(y_ticks)
-
-#         ax.set_title(title, fontsize=fontsize)
-
-#         # gl.top_labels = False  
-#         # gl.right_labels = False  
-#         # gl.bottom_labels = True  
-#         # gl.left_labels = True   
-        
-
-#         ax.set_xticks(x_ticks)  
-#         ax.set_yticks(y_ticks)  
-#         ax.set_xlim(bbox[0], bbox[2])  
-#         ax.set_ylim(bbox[1], bbox[3])  
-
-#         im = ax.imshow(
-#             data, 
-#             cmap=cmap, 
-#             vmin=vmin, 
-#             vmax=vmax, 
-#             extent=extent, 
-#             transform=ccrs.PlateCarree(),
-#             rasterized=True 
-#         )
-#         ax.set_title(title)
-#         # fig.colorbar(im, ax=ax, orientation='vertical', fraction=fraction, pad=pad)
-
-#         # Define the colorbar label based on the colormap used
-#         if cmap == 'bwr':
-#             cbar_label = "AFI"
-#         else:
-#             cbar_label = "Brightness Temperature (°K)"
-
-#         cbar = fig.colorbar(im, ax=ax, orientation='vertical', fraction=fraction, pad=pad)
-#         cbar.set_label(cbar_label, fontsize=12)
-
-
-#         # # Metrics 
-#         # if row == 2:  
-#         #     # Use gen_hr for comparison with tmp_hr
-#         #     rmse = calculate_rmse(gen_hr[0, col].cpu().detach().numpy(), tmp_hr[0, col].cpu().numpy())
-#         #     r2 = calculate_r2(gen_hr[0, col].cpu().detach().numpy(), tmp_hr[0, col].cpu().numpy())
-
-#         #     psnr_value = calculate_psnr(gen_hr[0, col].cpu().detach().numpy(), tmp_hr[0, col].cpu().numpy())
-
-#         #     ssim_value = calculate_ssim(gen_hr[0, col].cpu().detach().numpy(), tmp_hr[0, col].cpu().numpy())
-#         #     # ax.text(0.5, -0.3, f'RMSE: {rmse:.4f}\nR²: {r2:.4f}\nPSNR: {psnr_value:.4f}\nSSIM: {ssim_value:.4f}', 
-#         #     #         transform=ax.transAxes, ha='center', va='top', fontsize=12)
-
-#         #     # Append to lists
-#         #     rmse_list.append(rmse)
-#         #     r2_list.append(r2)
-#         #     psnr_list.append(psnr_value)
-#         #     ssim_list.append(ssim_value)
-#         #     print(f"For file {filelist[i]}, RMSE: {rmse:.4f}, R²: {r2:.4f}, PSNR: {psnr_value:.4f}, SSIM: {ssim_value:.4f}")
-#         # Show metrics on plot
-#         # ax.text(0.5, -0.3, f'RMSE: {rmse:.4f}\nR²: {r2:.4f}\nPSNR: {psnr_value:.4f}\nSSIM: {ssim_value:.4f}', 
-#         #         transform=ax.transAxes, ha='center', va='top', fontsize=12)  
-
-         
-#         # plt.subplots_adjust(
-#         #     wspace=0.38, 
-#         #     hspace=-0.4 
-#         #     # bottom=0.2, 
-#         #     # left=0.2     
-#         # )
-#         # print(f"Saving {filelist[i][:-3]}.png")
-#         # print('-------------------------------------------------------')
-#         # plt.savefig(
-#         #     workpath + 'Test_Outputs/Plots/' + filelist[i][:-3] + '.png', 
-#         #     bbox_inches='tight', 
-#         #     facecolor=(1, 1, 1, 0)
-#         # )
-#         # print(f"Saving {filelist[i][:-3]}.pdf")
-#         # plt.savefig(
-#         #     workpath + 'Test_Outputs/Plots/' + filelist[i][:-3] + '.pdf', 
-#         #     bbox_inches='tight', 
-#         #     facecolor=(1, 1, 1, 0)
-#         # )
-#         plt.close()
-
-
-
-# average_rmse = np.mean(rmse_list)
-# average_r2 = np.mean(r2_list)
-# average_psnr = np.mean(psnr_list)
-# average_ssim = np.mean(ssim_list)
-
-# Print or log the results
-# print(f'Average RMSE: {average_rmse:.4f}')
-# print(f'Average R²: {average_r2:.4f}')
-# print(f'Average PSNR: {average_psnr:.4f}')
-# print(f'Average SSIM: {average_ssim:.4f}')
-
-
-# Standard deviations
-# std_rmse = np.std(rmse_list)
-# std_r2 = np.std(r2_list)
-# std_psnr = np.std(psnr_list)
-# std_ssim = np.std(ssim_list)
-
-# # Print with std
-# print(f'Average RMSE: {average_rmse:.4f} ± {std_rmse:.4f}')
-# print(f'Average R²: {average_r2:.4f} ± {std_r2:.4f}')
-# print(f'Average PSNR: {average_psnr:.4f} ± {std_psnr:.4f}')
-# print(f'Average SSIM: {average_ssim:.4f} ± {std_ssim:.4f}')
-
-
-
-
-# ── Metric helpers ────────────────────────────────────────────────────────────
 def compute_metrics(pred_img, gt_img):
     """Return a dict of all metrics for one image pair."""
     return {
@@ -459,7 +215,6 @@ def print_metrics(label, metrics_dict, indent=0):
     pad = ' ' * indent
     print(f"{pad}{label}")
     for k, v in metrics_dict.items():
-        # some metrics may be strings (e.g. filename); format accordingly
         if isinstance(v, str):
             print(f"{pad}  {k:<20s}: {v}")
         else:
@@ -469,51 +224,41 @@ def print_metrics(label, metrics_dict, indent=0):
                 # fallback to generic str conversion if formatting fails
                 print(f"{pad}  {k:<20s}: {v}")
 
-# ── Per-image inference + metric collection ───────────────────────────────────
 all_metrics = []          # list of dicts, one per image
 
 for i in range(len_file):
-    # ── Load & preprocess ────────────────────────────────────────────────────
     filepath = os.path.join(test_dir, filelist[i])
     file = h5py.File(filepath, 'r')
     tmp_lr = norm_goes(np.array(file['goes'][:]))
     tmp_hr = norm_viirs(np.array(file['viirs'][:]))
 
-    # create tensors directly with appropriate dtype/device to avoid deprecated constructors
     tmp_lr = torch.tensor(tmp_lr, dtype=torch.float32, device=device).reshape((1, 3, 27, 35))
     tmp_hr = torch.tensor(tmp_hr, dtype=torch.float32, device=device).reshape((1, 3, 162, 210))
 
     imgs_lr = Variable(tmp_lr.type(Tensor)).to(device)
     imgs_hr = Variable(tmp_hr.type(Tensor)).to(device)
 
-    # ── Inference ────────────────────────────────────────────────────────────
     gen_hr  = generator(imgs_lr)
     intero  = nn.functional.interpolate(imgs_lr, scale_factor=4)
 
-    # ── Denormalise ──────────────────────────────────────────────────────────
     gen_hr = denorm_viirs(gen_hr)
     imgs_lr = denorm_goes(imgs_lr)
     imgs_hr = denorm_viirs(imgs_hr)
     intero  = denorm_goes(intero)
 
-    # ── Mask tensors ─────────────────────────────────────────────────────────
-    # avoid deprecated constructors by creating from existing tensors
     x_mask_tensor = x_mask.clone()
     y_mask_tensor = y_mask.clone()
     x_mask_tensor[x_mask == 0] = float('nan')
     y_mask_tensor[y_mask == 0] = float('nan')
 
-    # ── Spatial crop ─────────────────────────────────────────────────────────
     imgs_lr = imgs_lr[:, :, :27,  :]
     intero  = intero [:, :, :162, :]
     imgs_hr = imgs_hr[:, :, :162, :]
     gen_hr  = gen_hr [:, :, :162, :]
 
-    # ── Convert to numpy for metric functions ────────────────────────────────
     pred_np = gen_hr[0].cpu().detach().numpy()   # (C, H, W)
     gt_np   = imgs_hr[0].cpu().detach().numpy()
 
-    # ── Per-image metrics ────────────────────────────────────────────────────
     m = compute_metrics(pred_np, gt_np)
     m['filename'] = filelist[i]          # keep provenance
     all_metrics.append(m)
@@ -521,7 +266,6 @@ for i in range(len_file):
     print_metrics(f"[{i+1:03d}/{len_file}] {filelist[i]}", m, indent=2)
     plt.close()
 
-# ── Global (aggregate) metrics ────────────────────────────────────────────────
 metric_keys = ['grad_mag', 'grad_tv', 'fourier_rmse', 'wavelet_tv']
 
 global_metrics = {
