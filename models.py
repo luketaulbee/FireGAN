@@ -184,94 +184,6 @@ def denorm_goes(sr_goes_data):
     return sr_goes_data
 
     
-# def plot_example(viirs, goes, sr_viirs, interpolation, batches_done, channel_name, vmin=None, vmax=None):
-    
-    # # TODO: add an arg for savefigure path
-    # fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-
-    # im1 = axes[0, 0].imshow(viirs, cmap='Spectral_r', vmin=vmin, vmax=vmax)
-    # axes[0, 0].set_title(f'VIIRS {channel_name}')
-    # plt.colorbar(im1, ax=axes[0, 0], fraction=0.04, pad=0.025)
-
-    # im2 = axes[0, 1].imshow(goes, cmap='Spectral_r', vmin=vmin, vmax=vmax)
-    # axes[0, 1].set_title(f'GOES {channel_name}')
-    # plt.colorbar(im2, ax=axes[0, 1], fraction=0.04, pad=0.025)
-
-    # im3 = axes[1, 0].imshow(sr_viirs, cmap='Spectral_r', vmin=vmin, vmax=vmax)
-    # axes[1, 0].set_title(f'SR {channel_name}')
-    # plt.colorbar(im3, ax=axes[1, 0], fraction=0.04, pad=0.025)
-
-    # im4 = axes[1, 1].imshow(interpolation, cmap='Spectral_r', vmin=vmin, vmax=vmax)
-    # axes[1, 1].set_title(f'Interpolation {channel_name}')
-    # plt.colorbar(im4, ax=axes[1, 1], fraction=0.04, pad=0.025)
-
-    # Save figure
-    # plt.savefig(f"/content/drive/MyDrive/Projects/GOES_Super_Resolution_HW/Code/FireGAN_HW/Images/Train/{batches_done}_{channel_name}_{Date}.png", format='png', bbox_inches='tight', facecolor=(1, 1, 1, 0))
-
-    plt.close()
-    
-# import cartopy.feature as cf    
-# def plot_example_afi(viirs, goes, sr, interpolation, batches_done, channel_name, abox, vmin=None, vmax=None, facecolor=None, cf=cf):
-
-#     # Select colormap based on channel_name
-#     colormap = 'bwr' if channel_name == "AFI" else 'Spectral_r'
-
-#     # Load the states and provinces features
-#     states_provinces = cf.NaturalEarthFeature(
-#         category='cultural',
-#         name='admin_1_states_provinces_lines',
-#         scale='50m',
-#         facecolor='none'
-#     )
-
-#     fig, axs = plt.subplots(2, 2, figsize=[10, 8], subplot_kw={'projection': ccrs.PlateCarree()})
-
-#     data_dict = {
-#         "VIIRS": viirs,
-#         "GOES": goes,
-#         "SR-VIIRS": sr,
-#         "Interpolation-VIIRS": interpolation
-#     }
-
-#     lon = np.linspace(start=abox[0], stop=abox[2], num=viirs.shape[1])
-#     lat = np.linspace(start=abox[1], stop=abox[3], num=viirs.shape[0])
-#     lon, lat = np.meshgrid(lon, lat)
-
-#     for ax, (key, data) in zip(axs.flat, data_dict.items()):
-#         ax.set_title(f"{key}-{channel_name}")
-#         ax.add_feature(states_provinces, edgecolor='black', linewidth=2.5, zorder=3)
-#         ax.add_feature(cf.LAND)
-#         ax.add_feature(cf.OCEAN, zorder=3)
-#         ax.add_feature(cf.COASTLINE, linewidth=2.5)
-#         ax.add_feature(cf.BORDERS, linestyle=':')
-
-#         cm = ax.pcolormesh(lon, lat, np.flipud(data), cmap=colormap, transform=ccrs.PlateCarree(), vmin=vmin, vmax=vmax)
-
-#         gls = ax.gridlines(draw_labels=False, crs=ccrs.PlateCarree(), linestyle='--', zorder=4)
-#         ax.coastlines()
-
-#         x = np.round(np.linspace(lon.min(), lon.max(), 5), 2)
-#         y = np.round(np.linspace(lat.min(), lat.max(), 4), 2)
-#         gls.xlocator = mticker.FixedLocator(x)
-#         gls.ylocator = mticker.FixedLocator(y)
-#         ax.set_xticks(x)
-#         ax.set_yticks(y)
-#         ax.set_xlim(lon.min(), lon.max())
-#         ax.set_ylim(lat.min(), lat.max())
-#         ax.set_xlabel('Longitude')
-#         ax.set_ylabel('Latitude')
-
-#     # Add colorbar
-#     cbaxes = fig.add_axes([0.92, 0.12, 0.01, 0.75])  # [left, bottom, width, height]
-#     cb = fig.colorbar(cm, cax=cbaxes)
-#     cb.set_label(channel_name, fontsize=14)
-    
-#     year = viirs_file.split('.')[0]
-#     doy = viirs_file.split('.')[1]
-    
-#     # Save figure
-#     plt.savefig(f"/content/drive/MyDrive/Projects/GOES_Super_Resolution_HW/Plots/ESRGAN_Output/{batches_done}.{channel_name}.{year}.{doy}.png", format='png', bbox_inches='tight', facecolor=(1, 1, 1, 0))
-#     plt.close()
     
     
     import glob
@@ -521,36 +433,6 @@ def calculate_r2(pred, gt):
     return 1 - (ss_res / ss_tot) if ss_tot != 0 else 0
 
 
-
-# def calculate_psnr(pred, gt):
-#     # Ensure images are in the same shape
-#     if pred.ndim == 2:
-#         pred = pred[np.newaxis, :, :]
-#     if gt.ndim == 2:
-#         gt = gt[np.newaxis, :, :]
-
-#     # Replicate grayscale to RGB if necessary
-#     if pred.shape[0] == 1:
-#         pred = np.repeat(pred, 3, axis=0)
-#     if gt.shape[0] == 1:
-#         gt = np.repeat(gt, 3, axis=0)
-
-#     # Normalize images if necessary (assuming norm_viirs normalizes to range [0, 1])
-#     pred = norm_viirs(np.array(pred))
-#     gt = norm_viirs(np.array(gt))
-
-#     # Calculate Mean Squared Error (MSE)
-#     mse = np.mean((pred - gt) ** 2)
-
-#     # Handle perfect match (MSE = 0)
-#     if mse == 0:
-#         return float('inf')
-
-#     # Calculate Peak Signal-to-Noise Ratio (PSNR)
-#     max_pixel = gt.max()  # Assuming pixel values are in range [0, 1]
-#     psnr_value = 10 * np.log10((max_pixel ** 2) / mse)
-
-#     return psnr_value
 
 def calculate_psnr(pred, gt):
 
